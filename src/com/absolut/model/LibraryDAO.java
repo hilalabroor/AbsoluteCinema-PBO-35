@@ -100,4 +100,54 @@ public class LibraryDAO {
             e.printStackTrace();
         }
     }
+
+    // 6. Tambahkan Film ke History
+    public static boolean addHistory(int userId, int filmId) {
+        String sql = "INSERT INTO history (user_id, film_id) VALUES (?, ?)";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, userId);
+            ps.setInt(2, filmId);
+            return ps.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // 7. Ambil Riwayat Tontonan User (History)
+    public static List<Film> getUserHistory(int userId) {
+        List<Film> history = new ArrayList<>();
+        
+        String sql = "SELECT f.* FROM films f " +
+                     "JOIN history h ON f.film_id = h.film_id " +
+                     "WHERE h.user_id = ? ORDER BY h.id DESC"; // DESC agar terbaru di atas
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                history.add(new Film(
+                    rs.getInt("film_id"),
+                    rs.getString("title"),
+                    rs.getString("genre"),
+                    rs.getDouble("rating"),
+                    rs.getString("synopsis"),
+                    rs.getString("poster_path"),
+                    rs.getString("trailer_gif_path"),
+                    rs.getString("audio_path")
+                ));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return history;
+    }
 }

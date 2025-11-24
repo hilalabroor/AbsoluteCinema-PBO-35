@@ -8,7 +8,7 @@ public class DBConnection {
     
     // Konfigurasi Database
     // Pastikan XAMPP MySQL sudah di-START
-    private static final String URL = "jdbc:mysql://localhost:3306/db_absolut_cinema";
+    private static final String URL = "jdbc:mysql://localhost:3306/absolutecinema";
     private static final String USER = "root"; 
     private static final String PASSWORD = ""; 
     

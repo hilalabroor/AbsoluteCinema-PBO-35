@@ -2,6 +2,7 @@ package com.absolut.view;
 
 import com.absolut.components.CinemaButton;
 import com.absolut.model.Film;
+import com.absolut.model.LibraryDAO;
 import com.absolut.model.User;
 
 import javax.swing.*;
@@ -13,7 +14,7 @@ public class DetailPage extends JFrame {
 
     private Film film;
     private User user;
-    
+
     // Komponen yang perlu diakses global di class ini
     private JLabel lblPoster;
     private JProgressBar progressBar;
@@ -29,8 +30,8 @@ public class DetailPage extends JFrame {
         setSize(800, 600); // Sedikit dipertinggi buat progress bar
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        
-        // Saat jendela ditutup, pastikan suara mati!
+
+        // Saat jendela ditutup, pastikan suara mati
         addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
@@ -46,12 +47,12 @@ public class DetailPage extends JFrame {
         leftPanel.setBackground(new Color(18, 18, 18));
         leftPanel.setPreferredSize(new Dimension(300, 500));
         leftPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        
+
         lblPoster = new JLabel();
         lblPoster.setHorizontalAlignment(SwingConstants.CENTER);
         lblPoster.setBorder(BorderFactory.createLineBorder(new Color(50, 50, 50), 2));
-        loadStaticPoster(); // Method helper (lihat bawah)
-        
+        loadStaticPoster(); // Method helper
+
         leftPanel.add(lblPoster);
         add(leftPanel, BorderLayout.WEST);
 
@@ -100,7 +101,7 @@ public class DetailPage extends JFrame {
 
         btnPlay = new CinemaButton("▶ PLAY PREVIEW");
         btnPlay.setPreferredSize(new Dimension(160, 40));
-        
+
         JButton btnWatchlist = new JButton("+ Watchlist");
         btnWatchlist.setBackground(new Color(50, 50, 50));
         btnWatchlist.setForeground(Color.WHITE);
@@ -126,7 +127,6 @@ public class DetailPage extends JFrame {
         add(rightPanel, BorderLayout.CENTER);
 
         // --- EVENTS ---
-        
         // Event Klik Play (MULTITHREADING TRIGGER)
         btnPlay.addActionListener(e -> {
             if (!isPreviewRunning) {
@@ -135,10 +135,24 @@ public class DetailPage extends JFrame {
         });
 
         btnWatchlist.addActionListener(e -> {
-            if (user.canAddToWatchlist(0)) {
-                JOptionPane.showMessageDialog(this, "Film berhasil ditambahkan!");
+            if (user == null) {
+                JOptionPane.showMessageDialog(this, "User belum login.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            int currentCount = LibraryDAO.getWatchlistCount(user.getId());
+
+            if (!user.canAddToWatchlist(currentCount)) {
+                JOptionPane.showMessageDialog(this, "Limit FREE user tercapai! Upgrade ke Premium.", "Gagal", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            boolean success = LibraryDAO.addToWatchlist(user.getId(), film.getId());
+
+            if (success) {
+                JOptionPane.showMessageDialog(this, "Film berhasil ditambahkan ke Watchlist!");
             } else {
-                JOptionPane.showMessageDialog(this, "Limit tercapai! Upgrade Premium.", "Gagal", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Film sudah ada atau terjadi kesalahan.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
     }
@@ -148,56 +162,45 @@ public class DetailPage extends JFrame {
     // ========================================================
 
     private void startPreviewThread() {
-        // 1. Buat Thread Baru (Anonymous Class)
-        Thread previewThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    // A. Persiapan UI (Running di Thread terpisah)
-                    isPreviewRunning = true;
-                    SwingUtilities.invokeLater(() -> {
-                        btnPlay.setEnabled(false);
-                        btnPlay.setText("PLAYING...");
-                        progressBar.setVisible(true);
-                        progressBar.setValue(0);
-                    });
+        Thread previewThread = new Thread(() -> {
+            try {
+                isPreviewRunning = true;
+                SwingUtilities.invokeLater(() -> {
+                    btnPlay.setEnabled(false);
+                    btnPlay.setText("PLAYING...");
+                    progressBar.setVisible(true);
+                    progressBar.setValue(0);
+                });
 
-                    // B. Ganti Gambar ke GIF
-                    loadGifPreview();
+                loadGifPreview();
+                playAudio(film.getAudioPath());
 
-                    // C. Putar Audio (.wav)
-                    playAudio(film.getAudioPath());
-
-                    // D. Jalankan Timer Progress Bar (Durasi 10 Detik)
-                    // Loop 100 kali, setiap kali tidur 100ms = Total 10000ms (10 detik)
-                    for (int i = 0; i <= 100; i++) {
-                        final int progress = i;
-                        
-                        // Update UI harus via invokeLater agar aman
-                        SwingUtilities.invokeLater(() -> progressBar.setValue(progress));
-                        
-                        Thread.sleep(100); // Thread 'Tidur' 0.1 detik
-                    }
-
-                } catch (InterruptedException ex) {
-                    System.out.println("Preview Interrupted");
-                } finally {
-                    // E. Selesai (Reset Semuanya)
-                    stopAudio();
-                    isPreviewRunning = false;
-                    
-                    SwingUtilities.invokeLater(() -> {
-                        loadStaticPoster(); // Balikin gambar poster
-                        btnPlay.setText("▶ PLAY PREVIEW");
-                        btnPlay.setEnabled(true);
-                        progressBar.setVisible(false);
-                    });
+                for (int i = 0; i <= 100; i++) {
+                    final int progress = i;
+                    SwingUtilities.invokeLater(() -> progressBar.setValue(progress));
+                    Thread.sleep(100);
                 }
+
+            } catch (InterruptedException ex) {
+                System.out.println("Preview Interrupted");
+            } finally {
+                stopAudio();
+                isPreviewRunning = false;
+
+                if (user != null && film != null) {
+                    LibraryDAO.addHistory(user.getId(), film.getId());
+                }
+
+                SwingUtilities.invokeLater(() -> {
+                    loadStaticPoster();
+                    btnPlay.setText("▶ PLAY PREVIEW");
+                    btnPlay.setEnabled(true);
+                    progressBar.setVisible(false);
+                });
             }
         });
 
-        // 2. Jalankan Thread
-        previewThread.start(); 
+        previewThread.start();
     }
 
     // --- Helper: Load Gambar Statis ---
@@ -214,10 +217,8 @@ public class DetailPage extends JFrame {
     // --- Helper: Load GIF Animasi ---
     private void loadGifPreview() {
         try {
-            // GIF tidak perlu di-scale smooth, langsung saja biar gerak
             ImageIcon icon = new ImageIcon("resources/gifs/" + film.getTrailerGifPath());
-            // Scaling GIF agak tricky di Swing, kita pakai simple scaling
-            Image img = icon.getImage().getScaledInstance(260, 380, Image.SCALE_DEFAULT); 
+            Image img = icon.getImage().getScaledInstance(260, 380, Image.SCALE_DEFAULT);
             lblPoster.setIcon(new ImageIcon(img));
         } catch (Exception e) {
             System.out.println("GIF tidak ditemukan: " + e.getMessage());
