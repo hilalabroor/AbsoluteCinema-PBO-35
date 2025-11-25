@@ -17,3 +17,4 @@ public class PremiumUser extends User {
         return "PREMIUM";
     }
 }
+

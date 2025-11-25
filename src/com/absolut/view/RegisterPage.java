@@ -17,6 +17,7 @@ public class RegisterPage extends JFrame {
         // 1. Setup Frame
         setTitle("AbsolutCinema - Create Account");
         setSize(900, 600);
+         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
@@ -122,24 +123,34 @@ public class RegisterPage extends JFrame {
     }
 
     private void handleRegister() {
-        String user = txtUsername.getText();
-        String pass = new String(txtPassword.getPassword());
-        String type = rbPremium.isSelected() ? "PREMIUM" : "FREE";
+    String user = txtUsername.getText();
+    String pass = new String(txtPassword.getPassword());
+    String type = rbPremium.isSelected() ? "PREMIUM" : "FREE";
 
-        if (user.isEmpty() || pass.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Data tidak boleh kosong!");
-            return;
-        }
+    if (user.isEmpty() || pass.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Data tidak boleh kosong!");
+        return;
+    }
 
-        // Panggil Logika Backend User.java
-        boolean success = User.register(user, pass, type);
-
+    // Jika FREE → langsung register
+    if (type.equals("FREE")) {
+        boolean success = User.register(user, pass, "FREE");
+        
         if (success) {
-            JOptionPane.showMessageDialog(this, "Akun Berhasil Dibuat!\nSilakan Login.");
+            JOptionPane.showMessageDialog(this, "Akun Free Berhasil Dibuat!\nSilakan Login.");
             new LoginPage().setVisible(true);
             this.dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Gagal! Username mungkin sudah dipakai.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Gagal! Username mungkin sudah dipakai.", 
+                                          "Error", JOptionPane.ERROR_MESSAGE);
         }
+        return;
     }
+
+    // Jika PREMIUM → tampilkan PaymentPage
+    PaymentPage payment = new PaymentPage(user, pass);
+    payment.setVisible(true);
+    this.dispose();
+}
+
 }

@@ -13,6 +13,7 @@ public class LandingPage extends JFrame {
         // 1. Setup Frame
         setTitle("Welcome to AbsolutCinema");
         setSize(1000, 650);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

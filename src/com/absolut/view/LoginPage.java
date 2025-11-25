@@ -16,6 +16,7 @@ public class LoginPage extends JFrame {
         // 1. Setup Frame Utama
         setTitle("AbsolutCinema - Login");
         setSize(900, 600);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Biar muncul di tengah layar
         setLayout(new BorderLayout());

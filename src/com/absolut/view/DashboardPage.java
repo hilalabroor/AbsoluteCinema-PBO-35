@@ -22,6 +22,7 @@ public class DashboardPage extends JFrame {
         // 1. Setup Frame Utama
         setTitle("AbsolutCinema - Dashboard");
         setSize(1200, 800); // Ukuran agak besar biar lega
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());

@@ -29,6 +29,7 @@ public class DetailPage extends JFrame {
         setTitle(film.getTitle() + " - Detail");
         setSize(800, 600); // Sedikit dipertinggi buat progress bar
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Saat jendela ditutup, pastikan suara mati

@@ -22,6 +22,7 @@ public class LibraryPage extends JFrame {
         setTitle("My Personal Library - " + user.getUsername());
         setSize(1000, 700);
         setLocationRelativeTo(null);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
         getContentPane().setBackground(new Color(18, 18, 18));
