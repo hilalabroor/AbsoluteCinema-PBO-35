@@ -7,9 +7,10 @@ import java.awt.event.MouseEvent;
 
 public class CinemaButton extends JButton {
     
-    private Color normalColor = new Color(242, 201, 76); // Kuning Emas
-    private Color hoverColor = new Color(255, 220, 100); // Kuning Terang
-    private Color pressedColor = new Color(200, 160, 50); // Kuning Gelap
+    private Color normalColor = new Color(255, 0, 110);   // Neon Pink
+    private Color hoverColor = new Color(138, 43, 226);   // Electric Purple
+    private Color pressedColor = new Color(0, 243, 255);  // Neon Cyan
+    private Color textColor = Color.WHITE; // Teks Putih
 
     public CinemaButton(String text) {
         super(text);
@@ -52,12 +53,12 @@ public class CinemaButton extends JButton {
         g2.setColor(getBackground());
         g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
 
-        // Gambar Teks di tengah
+        // Gambar Teks
         FontMetrics fm = g2.getFontMetrics();
         int textX = (getWidth() - fm.stringWidth(getText())) / 2;
         int textY = (getHeight() + fm.getAscent()) / 2 - 4;
         
-        g2.setColor(getForeground());
+        g2.setColor(textColor); // Gunakan warna putih
         g2.drawString(getText(), textX, textY);
 
         g2.dispose();

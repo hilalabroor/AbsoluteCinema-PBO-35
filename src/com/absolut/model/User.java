@@ -3,8 +3,7 @@ package com.absolut.model;
 import com.absolut.database.DBConnection;
 import java.sql.*;
 
-// Abstract Class: Tidak bisa dibuat objeknya langsung (new User() -> Error)
-public abstract class User {
+public abstract class User implements SubscriptionPlan{
     protected int id;
     protected String username;
     protected String password;
@@ -15,17 +14,18 @@ public abstract class User {
         this.password = password;
     }
 
-    // --- METHOD ABSTRAK (Polymorphism) ---
-    // Setiap anak WAJIB punya aturan sendiri soal ini
+    // METHOD ABSTRAK 
     public abstract boolean canAddToWatchlist(int currentWatchlistSize);
     public abstract String getUserType();
 
-    // --- GETTER ---
+    @Override
+    public abstract String getPlanName();
+
+    // GETTER
     public int getId() { return id; }
     public String getUsername() { return username; }
 
-    // --- FITUR LOGIN (STATIC) ---
-    // Method ini nge-cek DB, lalu mengembalikan objek FreeUser atau PremiumUser
+    // FITUR LOGIN
     public static User login(String username, String password) {
         String sql = "SELECT * FROM users WHERE username = ? AND password = ?";
         
@@ -39,9 +39,8 @@ public abstract class User {
             
             if (rs.next()) {
                 int id = rs.getInt("user_id");
-                String type = rs.getString("subscription_type"); // 'FREE' atau 'PREMIUM'
+                String type = rs.getString("subscription_type");
                 
-                // DISINI KEAJAIBAN POLYMORPHISM TERJADI
                 if ("PREMIUM".equalsIgnoreCase(type)) {
                     return new PremiumUser(id, username, password);
                 } else {
@@ -54,7 +53,7 @@ public abstract class User {
         return null; // Login gagal
     }
 
-    // --- FITUR REGISTER (STATIC) ---
+    // FITUR REGISTER
     public static boolean register(String username, String password, String type) {
         String sql = "INSERT INTO users (username, password, subscription_type) VALUES (?, ?, ?)";
         
@@ -63,7 +62,7 @@ public abstract class User {
             
             ps.setString(1, username);
             ps.setString(2, password);
-            ps.setString(3, type.toUpperCase()); // Pastikan kapital (FREE/PREMIUM)
+            ps.setString(3, type.toUpperCase());
             
             return ps.executeUpdate() > 0; // Return true jika berhasil
         } catch (SQLException e) {
@@ -71,4 +70,22 @@ public abstract class User {
             return false;
         }
     }
+
+    // FITUR UPGRADE
+    public static boolean upgradeToPremium(int userId) {
+        String sql = "UPDATE users SET subscription_type = 'PREMIUM' WHERE user_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            
+            ps.setInt(1, userId);
+            
+            return ps.executeUpdate() > 0; // True jika berhasil update
+            
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
