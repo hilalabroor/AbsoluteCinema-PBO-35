@@ -5,52 +5,64 @@ import com.absolut.model.User;
 import javax.swing.*;
 import java.awt.*;
 
-public class LoginPage extends JFrame {
+public class LoginPage extends JPanel {
 
-    // Komponen GUI
     private JTextField txtUsername;
     private JPasswordField txtPassword;
     private CinemaButton btnLogin;
+    private JButton btnRegisterLink;
+    
+    // Gambar Background Kiri
+    private Image bgImage;
 
     public LoginPage() {
-        // 1. Setup Frame Utama
-        setTitle("AbsolutCinema - Login");
-        setSize(900, 600);
-        setExtendedState(JFrame.MAXIMIZED_BOTH);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Biar muncul di tengah layar
-        setLayout(new BorderLayout());
+        setLayout(new GridLayout(1, 2));
+        setBackground(Color.BLACK);
 
-        // 2. Panel Kiri (Gambar/Logo)
-        JPanel panelKiri = new JPanel();
-        panelKiri.setBackground(new Color(18, 18, 18)); // Gelap
-        panelKiri.setPreferredSize(new Dimension(400, 600));
-        panelKiri.setLayout(new GridBagLayout());
-        
-        JLabel lblLogo = new JLabel("<html><div style='text-align: center;'>ABSOLUT<br><span style='color:#F2C94C'>CINEMA</span></div></html>");
-        lblLogo.setFont(new Font("Segoe UI", Font.BOLD, 48));
-        lblLogo.setForeground(Color.WHITE);
-        panelKiri.add(lblLogo);
+        // Load Gambar Background
+        try {
+            ImageIcon icon = new ImageIcon("resources/images/login_bg.jpg");
+            bgImage = icon.getImage();
+        } catch (Exception e) {
+            bgImage = null;
+        }
 
-        // 3. Panel Kanan (Form Input)
+        // PANEL KIRI (HANYA GAMBAR)
+        JPanel panelKiri = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g;
+
+                if (bgImage != null) {
+                    g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                    g2.drawImage(bgImage, 0, 0, getWidth(), getHeight(), this);
+                } else {
+                    g2.setColor(Color.BLACK);
+                    g2.fillRect(0, 0, getWidth(), getHeight());
+                }
+            }
+        };
+
+        // PANEL KANAN (FORM INPUT)
         JPanel panelKanan = new JPanel();
-        panelKanan.setBackground(new Color(30, 30, 30)); // Abu Gelap
-        panelKanan.setLayout(new GridBagLayout()); // Biar form di tengah vertikal
+        panelKanan.setBackground(Color.BLACK);
+        panelKanan.setLayout(new GridBagLayout()); 
         
-        // Wadah Form (Biar rapi)
+        // Wadah Form (Box)
         JPanel formBox = new JPanel();
-        formBox.setLayout(new GridLayout(5, 1, 10, 10)); // 5 Baris, jarak 10px
-        formBox.setBackground(new Color(30, 30, 30));
-        formBox.setPreferredSize(new Dimension(300, 250));
+        formBox.setLayout(new GridLayout(5, 1, 10, 15)); 
+        formBox.setBackground(Color.BLACK);
+        formBox.setPreferredSize(new Dimension(350, 300)); 
 
         // Komponen Form
         JLabel lblTitle = new JLabel("Welcome Back");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 36));
         lblTitle.setForeground(Color.WHITE);
         lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
 
         txtUsername = new JTextField();
-        txtUsername.putClientProperty("JTextField.placeholderText", "Username"); // *Butuh FlatLaf sebenernya, tapi gpp
+        txtUsername.putClientProperty("JTextField.placeholderText", "Username");
         styleField(txtUsername);
 
         txtPassword = new JPasswordField();
@@ -60,59 +72,65 @@ public class LoginPage extends JFrame {
 
         // Masukkan ke FormBox
         formBox.add(lblTitle);
-        formBox.add(new JLabel("Username:", SwingConstants.LEFT) {{ setForeground(Color.GRAY); }});
+        formBox.add(new JLabel("Username:", SwingConstants.LEFT) {{ 
+            setForeground(Color.GRAY); 
+            setFont(new Font("Segoe UI", Font.BOLD, 12)); 
+        }});
         formBox.add(txtUsername);
-        formBox.add(new JLabel("Password:", SwingConstants.LEFT) {{ setForeground(Color.GRAY); }});
+        formBox.add(new JLabel("Password:", SwingConstants.LEFT) {{ 
+            setForeground(Color.GRAY); 
+            setFont(new Font("Segoe UI", Font.BOLD, 12));
+        }});
         formBox.add(txtPassword);
         
-        // Tambah tombol terpisah biar ada jarak
+        // Layout Manager
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0; gbc.gridy = 0;
         panelKanan.add(formBox, gbc);
         
+        // Posisi Tombol Login
         gbc.gridy = 1;
-        gbc.insets = new Insets(20, 0, 0, 0); // Jarak atas
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(30, 0, 0, 0); 
+        gbc.fill = GridBagConstraints.HORIZONTAL; 
         panelKanan.add(btnLogin, gbc);
 
-        // 4. Gabungkan Panel
-        add(panelKiri, BorderLayout.WEST);
-        add(panelKanan, BorderLayout.CENTER);
+        // Link ke Register
+        btnRegisterLink = new JButton("Don't have an account? Sign Up");
+        btnRegisterLink.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        btnRegisterLink.setBorderPainted(false);
+        btnRegisterLink.setContentAreaFilled(false);
+        btnRegisterLink.setForeground(Color.LIGHT_GRAY);
+        btnRegisterLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        // 5. Event Handling (Logika Klik Tombol)
-        btnLogin.addActionListener(e -> handleLogin());
+        gbc.gridy = 2;
+        gbc.insets = new Insets(15, 0, 0, 0);
+        gbc.fill = GridBagConstraints.NONE; // Jangan di-stretch
+        panelKanan.add(btnRegisterLink, gbc);
+
+        // Gabungkan Panel
+        add(panelKiri);
+        add(panelKanan);
+
+        // Event Handling
+        btnLogin.addActionListener(e -> {
+            String user = txtUsername.getText();
+            String pass = new String(txtPassword.getPassword());
+            User loggedInUser = User.login(user, pass);
+            if (loggedInUser != null) {
+                MainFrame.getInstance().showDashboard(loggedInUser);
+            } else {
+                JOptionPane.showMessageDialog(this, "Username atau Password Salah!", "Login Gagal", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+
+        btnRegisterLink.addActionListener(e -> MainFrame.getInstance().showRegister());
     }
 
-    // Method styling biar text field keliatan modern
     private void styleField(JTextField field) {
-        field.setBackground(new Color(50, 50, 50));
+        field.setBackground(new Color(40, 40, 40)); // Warnanya pake Abu Gelap biar kontras dikit dari background
         field.setForeground(Color.WHITE);
         field.setCaretColor(Color.WHITE);
-        field.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10)); // Padding
-        field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-    }
-
-    // Method saat tombol diklik
-    private void handleLogin() {
-        String user = txtUsername.getText();
-        String pass = new String(txtPassword.getPassword());
-
-        // Panggil Logika Backend yang sudah kita tes tadi!
-        User loggedInUser = User.login(user, pass);
-
-    if (loggedInUser != null) {
-        // HAPUS JOptionPane (Popup) kalau mau langsung masuk
-        // JOptionPane.showMessageDialog(...) <-- Boleh dihapus atau dikomen
-        
-        // BUKA DASHBOARD
-        DashboardPage dashboard = new DashboardPage(loggedInUser);
-        dashboard.setVisible(true);
-        
-        // TUTUP LOGIN
-        this.dispose();
-            
-        } else {
-            JOptionPane.showMessageDialog(this, "Username atau Password Salah!", "Login Gagal", JOptionPane.ERROR_MESSAGE);
-        }
+        field.setBorder(BorderFactory.createLineBorder(new Color(60, 60, 60)));
+        field.setFont(new Font("Segoe UI", Font.PLAIN, 16)); 
     }
 }
