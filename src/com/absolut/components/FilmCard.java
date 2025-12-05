@@ -30,7 +30,7 @@ public class FilmCard extends JPanel {
             posterImage = null;
         }
 
-        // PANEL GAMBAR
+        // --- PANEL GAMBAR (Center Crop) ---
         JPanel imagePanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {

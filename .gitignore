@@ -1,1 +1,16 @@
 *.class
+# Ignore all media assets
+resources/images/
+resources/posters/
+resources/gifs/
+resources/audio/
+
+# Ignore file besar
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.wav
+*.mp3
+*.mp4
+*.sql

@@ -18,6 +18,7 @@ public class MainFrame extends JFrame {
 		setTitle("Absolute Cinema");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		setSize(1200, 700);
 		setLocationRelativeTo(null);
 
 		cardLayout = new CardLayout();
